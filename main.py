@@ -1,28 +1,33 @@
 import sys
 
+
 def main():
-    print("Type the number of the desired choice: ")
     while True:
         print("1. Encrypt")
         print("2. Decrypt")
         print("3. Exit")
-        user_choice = input("Option: ")
-        if user_choice == "1" or user_choice == "2":
-            break
+        user_choice = input("Type the number of the desired choice: ")
+        if user_choice == "1":
+            encrypted_file = input("Please input the name of the text file that you would like to encrypt (include the file extension): ")
+            if encrypted_file != "password.key" and encrypted_file != "encrypted.txt":
+                fileEncrypt(encrypted_file)
+                print("")
+            else:
+                sys.exit("Restricted file name.\n")
+        elif user_choice == "2":
+            decrypted_file = input("Please input the name of the text file that you would like to decrypt to (include the file extension): ")
+            if verification_pin():
+                if decrypted_file != "password.key" and decrypted_file != "encrypted.txt":
+                    fileDecrypt(decrypted_file)
+                    print("")
+                else:
+                    sys.exit("Restricted file name\n")
+            else:
+                print("Password does not match\n")
         elif user_choice == "3":
-            sys.exit()
+                sys.exit()
         else:
-            print(f"{user_choice} is not a valid option.")
-
-    if user_choice == "1":
-        encrypted_file = input("Please input the name of the text file that you would like to encrypt (include \".txt\"): ")
-        fileEncrypt(encrypted_file)
-    elif user_choice == "2":
-        decrypted_file = input("Please input the name of the text file that you would like to decrypt to (include \".txt\"): ")
-        if verification_pin():
-            fileDecrypt(decrypted_file)
-        else:
-            print("Password does not match")
+                print(f"{user_choice} is not a valid option.\n")
 
 
 def generate_pin():
@@ -31,23 +36,26 @@ def generate_pin():
         try:
             with open("password.key", "w") as file:
                 file.write(password)
+                return True
         except Exception as error:
-            print(f"Unexpected error has occured while reading or writing: {error}")
+            print(f"Unexpected error has occured while reading or writing: {error}\n")
     else:
-        print("Password does not meet qualifications, retry")
+        print("Password does not meet qualifications\n")
+    
+    return False
 
 
 def verification_pin():
-    password = input("Please enter your 6-digit pin:")
+    password = input("Please enter your 6-digit pin: ")
     if password.isnumeric() and len(password) == 6:
         try:
             with open("password.key", "r") as check:
-                check.readline().strip() == password
-                return True
+                if check.readline().strip() == password:
+                    return True
         except Exception as error:
-            print(f"Unexpected error has occured while reading or writing: {error}")
-    else:
-        return False
+            print(f"Unexpected error has occured while reading or writing: {error}\n")
+    
+    return False
 
 
 def encrypt(lines):
@@ -102,12 +110,11 @@ def fileEncrypt(user_file):
     try:
         with open(user_file, "r") as user:
             text = user.readlines()
-        with open("encrypted.txt", "w") as output:
-            output.write(encrypt(text))
-            generate_pin()
+        if generate_pin():
+            with open("encrypted.txt", "w") as output:
+                output.write(encrypt(text))
     except Exception as error:
-        print(f"Unexpected error has occured while reading or writing: {error}")
-
+        print(f"Unexpected error has occured while reading or writing: {error}\n")
 
 
 def fileDecrypt(output_file):
@@ -117,7 +124,7 @@ def fileDecrypt(output_file):
         with open(output_file, "w") as output:
             output.write(decrypt(text))
     except Exception as error:
-        print(f"Unexpected error has occured while reading or writing: {error}")
+        print(f"Unexpected error has occured while reading or writing: {error}\n")
 
 
 if __name__ == "__main__":
